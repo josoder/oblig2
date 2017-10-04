@@ -1,5 +1,5 @@
 # MD5 checksums with c. School assignment
-One of does "not very useful type of application", just a IO in C practice. 
+A not so very useful type of application, just a IO in C practice. 
 
 ## usage
 Takes 2 arguments, descriped below.
