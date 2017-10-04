@@ -6,7 +6,8 @@ Takes 2 arguments, descriped below.
 The checksum is written to file as binary. 
 
 ### run it
-clean with make clean 
+-make
+-make clean 
 ```
 -add , add md5 checksum to end of file
 -test , recompute the checksum and validate it with one attached to the end of the file
