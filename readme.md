@@ -7,6 +7,7 @@ The checksum is written to file as binary.
 
 ### run it
 -make
+<br>
 -make clean 
 ```
 -add , add md5 checksum to end of file
