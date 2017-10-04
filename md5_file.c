@@ -2,10 +2,20 @@
 #include <string.h>
 #include "md5.h"
 #include <stdbool.h>
+#include <stdlib.h>
+
+/**
+ * MD5 to file
+ * Reads a file, compute a checksum and add it to the end of the file. 
+ * See readme.md for more information.
+ *
+ * Compile with make, clean with make clean
+ **/
+
 
 const char *ADD = "-add";
 const char *TEST = "-test";
-const char *STRIP = "-string"; 
+const char *STRIP = "-strip"; 
 // Add marker to now where the md5 checksum start. (If the file already has one)
 const char *MARK = "md5_checksum:"; 
 const char *END_MARK = "md5_checksum end";
@@ -14,6 +24,39 @@ void create_digest(char *buffer,size_t size_of_buffer, char *digest);
 bool has_digest(FILE *fptr);
 size_t calc_file_size(FILE *f);
 bool is_equal(char *buf1, char *buf2);
+
+/**
+ * Remove checksum from file 
+ */
+int strip_checksum(char *filename){
+    FILE *f = fopen(filename, "rb"); 
+    if(f==NULL){
+        puts("error opening file while trying to strip md5 checksum");
+        return 1; 
+    }
+
+    size_t size = calc_file_size(f); 
+    BYTE buffer[size];
+    int offset = MD5_BLOCK_SIZE+strlen(MARK);
+    int bytes_to_read = size - offset;
+    fread(buffer, 1, bytes_to_read, f);
+    
+    fclose(f);
+    
+    FILE *f2 = fopen(filename, "w+"); 
+    if (f2==NULL) {
+        puts("error while trying to write to file during md5 strip");
+        return 1; 
+    }
+
+    fwrite(buffer, 1, bytes_to_read, f); 
+    fclose(f2);
+    
+    puts("checkum is now deleted");
+
+    return 0; 
+}
+
 
 /**
  * Check if the checksum at the end of the file is valid
@@ -26,7 +69,7 @@ int checksum_is_valid(char *filename){
    
    fread(md5_buffer, 1, MD5_BLOCK_SIZE, f); 
     
-   puts("checksum atached to file is:");
+   puts("checksum attached to file is:");
    for(int i=0; i<MD5_BLOCK_SIZE; i++){
        printf("%02X", (BYTE) md5_buffer[i]);
    }
@@ -38,8 +81,8 @@ int checksum_is_valid(char *filename){
    BYTE md5_check[MD5_BLOCK_SIZE];
    fread(f_buffer, 1, b_size, f);
    create_digest(f_buffer, b_size, md5_check);
-    
-   puts("recalculated files checksum is:");
+   puts(""); 
+   puts("recalculated file checksum is:");
    for(int i=0; i<MD5_BLOCK_SIZE; i++){
        printf("%02X", (BYTE) md5_check[i]);
    }
@@ -149,8 +192,6 @@ void create_digest(char *buffer,size_t size_of_buffer, char *digest){
     md5_update(&ctx, buffer, size_of_buffer); 
    
     md5_final(&ctx, digest);
-  
-    puts("");
 }
 
 /**
@@ -166,7 +207,7 @@ int main(int argc, char *argv[]){
     }
 
     BYTE digest[MD5_BLOCK_SIZE];    
-    FILE *fptr = fopen("file", "rb"); 
+    FILE *fptr = fopen(argv[2], "rb"); 
     if(fptr==NULL){
         puts("error opening file");
         return 1;
@@ -190,7 +231,11 @@ int main(int argc, char *argv[]){
         }
         
     create_digest(buffer, file_size,digest);
-        add_checksum_to_file(digest, argv[2]);    
+        int res = add_checksum_to_file(digest, argv[2]);
+        if(res!=0) return 1; 
+        
+        puts("added checksum to file"); 
+        return 0;
     }  
     else if(strcmp(argv[1], TEST)==0){
             
@@ -199,9 +244,16 @@ int main(int argc, char *argv[]){
                 return 1; 
             }
          
-            checksum_is_valid(argv[2]);
-
-    }  
+            return checksum_is_valid(argv[2]);
+    } 
+    else if(strcmp(argv[1], STRIP)==0){
+        if(!contains_digest) {
+            puts("nothing to remove..");
+            return 1;
+        }
+        
+        return strip_checksum(argv[2]); 
+    }
 
     return 0;
 }
