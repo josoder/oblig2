@@ -159,7 +159,6 @@ int add_checksum_to_file(unsigned char *digest, char *filename){
  * Print description on how to use this app.
  */
 void print_usage(){
-    puts("wrong nr of args"); 
     puts("usage:");
     puts("md5 -add <filename>");
     puts("md5 -test <filename>");
@@ -201,6 +200,12 @@ void create_digest(char *buffer,size_t size_of_buffer, char *digest){
  * md5 -strip <filename>
  */
 int main(int argc, char *argv[]){
+    // no args
+    if(argc<2) {
+    	print_usage();
+	return 1;
+    }
+    // to few args or wrong keywords
     if(argc<3 && (strcmp(argv[1], ADD)!=0 || strcmp(argv[1], TEST)!=0 || strcmp(argv[1], STRIP)!=0)){
         print_usage();
         return 1;

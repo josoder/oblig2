@@ -1,5 +1,6 @@
 # MD5 checksums with c. School assignment
 A not so very useful type of application, just a IO in C practice. 
+The md5 algorithm: http://bradconte.com/md5_c
 
 ## usage
 Takes 2 arguments, descriped below.
